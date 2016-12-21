@@ -112,8 +112,8 @@ module EventMachine
       def unbind
         debug [:unbind, :connection]
 
-        # terminate any unfinished connections
-        :relay.values.compact.each do |s|
+        puts "Terminating any unfinished connections"
+        @servers.values.compact.each do |s|
           s.close_connection_after_writing
         end
       end
