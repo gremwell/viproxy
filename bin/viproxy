@@ -9,6 +9,13 @@ require 'optparse'
 ARGV << '--help' if ARGV.empty?
 
 options = {}
+$l_ssl_options = {}
+$l_ssl_options[:do_ssl] = false
+$l_ssl_options[:verify_peer] = false
+$r_ssl_options = {}
+$r_ssl_options[:do_ssl] = false
+$r_ssl_options[:verify_peer] = false
+
 OptionParser.new do |opts|
   opts.banner = "Usage: viproxy [options]"
 
@@ -28,12 +35,22 @@ OptionParser.new do |opts|
     options[:socket] = v
   end
 
-  opts.on("-z", "--ssl", "Run in SSL mode") do |v|
-    $ssl = true
-  end
+  {:l => $l_ssl_options, :r => $r_ssl_options}.each do |leg, ssl_options|
+    opts.on("--#{leg}-ssl", "#{leg}-leg: run in SSL mode") do |v|
+      ssl_options[:do_ssl] = v
+    end
 
-  opts.on("-c", "--sslcert [filename]", String,  "SSL certificate file (PEM)") do |v|
-    $sslcert = v
+    opts.on("--#{leg}-sslkey [filename]", String, "#{leg}-leg: SSL certificate key file (PEM)") do |v|
+      ssl_options[:private_key_file] = v
+    end
+
+    opts.on("--#{leg}-sslcert [filename]", String, "#{leg}-leg: SSL certificate file (PEM)") do |v|
+      ssl_options[:cert_chain_file] = v
+    end
+
+    opts.on("--#{leg}-sni [sni hostname]", String, "#{leg}-leg: SNI hostname") do |v|
+      ssl_options[:sni_hostname] = v
+    end
   end
 
   opts.on("-f", "--logfile [filename]", String,  "Log file") do |v|

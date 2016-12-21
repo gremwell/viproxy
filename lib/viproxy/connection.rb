@@ -17,8 +17,9 @@ module EventMachine
       end
 
       def post_init
-        if $ssl
-          start_tls :private_key_file => $sslcert, :cert_chain_file => $sslcert, :verify_peer => false
+        if $l_ssl_options[:do_ssl]
+          puts "Initiating SSL connection with client" if @debug
+          start_tls($l_ssl_options)
         end
       end
 
