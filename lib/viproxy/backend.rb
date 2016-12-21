@@ -8,13 +8,21 @@ module EventMachine
         @connected = EM::DefaultDeferrable.new
       end
 
-      def connection_completed
-        debug [@name, :conn_complete]
+      def ssl_handshake_completed
+        puts "SSL handshake completed"
         @plexer.connected(@name)
         @connected.succeed
+      end
 
-        #puts "START_TLS is initiating with the server using #{$sslcert} file"
-        start_tls  if $ssl
+      def connection_completed
+        debug [@name, :conn_complete]
+        if $ssl
+          puts "Initiating SSL connection with server"
+          start_tls
+        else
+          @plexer.connected(@name)
+          @connected.succeed
+        end
       end
 
       def receive_data(data)
