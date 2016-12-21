@@ -44,8 +44,8 @@ module EventMachine
         end
 
         servers.each do |s|
-          s.send_data data unless data.nil?
-          puts "Client data sent to the server"
+          puts "Sending client data to the server"
+          s.send data unless data.nil?
         end
       end
 
