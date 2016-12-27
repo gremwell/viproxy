@@ -4,8 +4,6 @@ module EventMachine
       attr_accessor :debug
 
       ##### Proxy Methods
-      def on_data(&blk); @on_data = blk; end
-      def on_response(&blk); @on_response = blk; end
       def on_finish(&blk); @on_finish = blk; end
       def on_connect(&blk); @on_connect = blk; end
 
