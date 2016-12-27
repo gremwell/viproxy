@@ -13,7 +13,8 @@ module EventMachine
       def initialize(options)
         @debug = options[:debug] || false
         @servers = {}
-        set_replacefile($regexfile) if $regexfile
+        @req_buff = ''
+        @resp_buff = ''
       end
 
       def post_init
@@ -25,12 +26,31 @@ module EventMachine
 
       def receive_data(data)
         debug [:connection, data]
-        replace_it(data,"REQ") if $regexfile
-        log("Client",data)
-        processed = @on_data.call(data) if @on_data
 
-        return if processed == :async or processed.nil?
-        relay_to_servers(processed)
+        if $replacement_req
+          # add new data to buffer (in most cases buffer is empty)
+          @req_buff += data
+          # choose payload's destiny depending on processing script
+          ret = @req_buff.instance_eval($replacement_req)
+          case ret
+          when :skip
+            # just skip this payload
+            @req_buff = ''
+            return
+          when :wait
+            # buffer more data
+            return
+          when :ok
+            # proceed to sending
+          end
+        else
+          # no replacement -- no buffering
+          @req_buff = data
+        end
+
+        log("Client", @req_buff)
+        relay_to_servers(@req_buff)
+        @req_buff = ''
       end
 
       def relay_to_servers(processed)
@@ -99,10 +119,25 @@ module EventMachine
       def relay_from_backend(name, data)
         puts "Backend sent data..."
         debug [:relay_from_backend, name, data]
-        replace_it(data,"RES") if $regexfile
-        log("Backend Server",data)
-        data = @on_response.call(name, data) if @on_response
-        send_data data unless data.nil?
+
+        if $replacement_resp
+          @resp_buff += data
+          ret = @resp_buff.instance_eval($replacement_resp)
+          case ret
+          when :skip
+            @resp_buff = ''
+            return
+          when :wait
+            return
+          when :ok
+          end
+        else
+          @resp_buff = data
+        end
+
+        log("Backend Server", @resp_buff)
+        send_data(@resp_buff)
+        @resp_buff = ''
       end
 
       def connected(name)
@@ -152,50 +187,6 @@ module EventMachine
           logfile.close
         end
       end
-
-
-      def replace_it(data,type)
-        $replacement_table[type].each do |r,c|
-          puts "Replacements are #{r} to #{c}"
-          data.gsub!(r,c)
-        end
-        return data
-      end
-
-      def set_replacefile(f)
-        puts "Replacement File is "+f.to_s
-        $replacement_table = {}
-        $replacement_table["RES"] = {}
-        $replacement_table["REQ"] = {}
-        contents=File.new(f, "r")
-        contents.each do |line|
-          next if line =~ /^#/ or line =~ /^\n/
-          type=line.split("\t")[0]
-          t = line.split("\t")[1]
-          r = Regexp.new t
-          c = line.split("\t")[2..1000].join("\t").chop
-
-          if c =~ /FUZZ/
-            str = "A" * c.split(" ")[1].to_i
-            puts str
-          else
-            str = c
-            puts str
-          end
-
-          case type
-            when "RES"
-              $replacement_table[type][r] = str
-            when "REQ"
-              $replacement_table[type][r] = str
-            when "BOTH"
-              $replacement_table["RES"][r] = str
-              $replacement_table["REQ"][r] = str
-          end
-
-        end
-      end
-
     end
   end
 end

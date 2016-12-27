@@ -57,8 +57,12 @@ OptionParser.new do |opts|
     $logfile = v
   end
 
-  opts.on("-p", "--regexfile [filename]", String,  "Replacement file") do |v|
-    $regexfile = v
+  opts.on("--req-replace [filename]", String,  "Replacement file for requests") do |v|
+    $replacement_req = File.new(v, "r").read
+  end
+
+  opts.on("--resp-replace [filename]", String,  "Replacement file for responses") do |v|
+    $replacement_resp = File.new(v, "r").read
   end
 
   opts.on("-v", "--verbose", "Run in debug mode") do |v|
