@@ -29,7 +29,7 @@ module EventMachine
       end
 
       def receive_data(data)
-        puts "Received data from the backend..."
+        puts "Received data from the backend..." if @debug
         debug [@name, data]
         @plexer.relay_from_backend(@name, data)
       end
