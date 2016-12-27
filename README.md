@@ -23,33 +23,34 @@ Transparent intercepting proxy in Ruby for MITM attacks.
 
 ## Getting started
 
-    $> ruby bin/viproxy
+    $ ruby bin/viproxy
     Usage: viproxy [options]
     -l, --listen [PORT]              Port to listen on
     -d, --duplex [host:port, ...]    List of backends to duplex data to
     -r, --relay [hostname:port]      Relay endpoint: hostname:port
     -s, --socket [filename]          Relay endpoint: unix filename
-    -z, --ssl                        Run in SSL mode
-    -c, --sslcert [filename]         SSL certificate file (PEM)
+        --l-ssl                      l-leg: run in SSL mode
+        --l-sslkey [filename]        l-leg: SSL certificate key file (PEM)
+        --l-sslcert [filename]       l-leg: SSL certificate file (PEM)
+        --l-sni [sni hostname]       l-leg: SNI hostname
+        --r-ssl                      r-leg: run in SSL mode
+        --r-sslkey [filename]        r-leg: SSL certificate key file (PEM)
+        --r-sslcert [filename]       r-leg: SSL certificate file (PEM)
+        --r-sni [sni hostname]       r-leg: SNI hostname
     -f, --logfile [filename]         Log file
-    -p, --regexfile [filename]       Replacement file
+        --req-replace [filename]     Replacement file for requests
+        --resp-replace [filename]    Replacement file for responses
     -v, --verbose                    Run in debug mode
 
-    $> ruby bin/viproxy -l 8080 -z -c cert.crt -f /tmp/x.log -v -d 127.0.0.1:8081 -r 127.0.0.1:8083
+Usage example:
 
-The above will start viproxy on port 8080, relay and respond with data from port 8083, and also (optional) duplicate all traffic to ports 8081 (and discard their responses).
+    $ ruby bin/viproxy -l 8443 -f test1.log -v -r dest.example.com:443 --l-ssl --r-ssl --l-sslkey ssl-key.pem --l-sslcert ssl-cert.pem --req-replace test-replace.rb
+
+This will listen on localhost:8443, write all data to test1.log, print debugging info, send incoming data towards dest.example.com:443, use SSL for incoming and outgoing connections, use specified SSL certificates for listening socket, match/replace incoming requests using specified script.
 
 ## Sample Search & Replace file
-    #Fuzzing Demo
-    REQ	rtf1	FUZZ 20000
-    #XSS injection to client requests
-    REQ	xsstest	<h1>Viproy Test</h1>
-    #Content-Length arrangements on server responses
-    RES	Content-Length: 3193	Content-Length: 25663
-    #XSS injection to server responses and client requests
-    BOTH	xsstest	<h1>Viproy Test</h1>
 
-
+See `replace_zip.rb`.
 
 ## License
 
