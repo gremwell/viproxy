@@ -42,11 +42,19 @@ Transparent intercepting proxy in Ruby for MITM attacks.
         --resp-replace [filename]    Replacement file for responses
     -v, --verbose                    Run in debug mode
 
-Usage example:
+Usage examples:
 
     $ ruby bin/viproxy -l 8443 -f test1.log -v -r dest.example.com:443 --l-ssl --r-ssl --l-sslkey ssl-key.pem --l-sslcert ssl-cert.pem --req-replace test-replace.rb
 
 This will listen on localhost:8443, write all data to test1.log, print debugging info, send incoming data towards dest.example.com:443, use SSL for incoming and outgoing connections, use specified SSL certificates for listening socket, match/replace incoming requests using specified script.
+
+    $ ruby bin/viproxy -l 8443 -r dest.example.com:443 --l-ssl --r-ssl --l-sslkey ssl-key.pem --l-sslcert ssl-cert.pem --r-sslkey client-ssl-key.pem --r-sslcert client-ssl-cert.pem
+
+This will listen on localhost:8443, send incoming data towards dest.example.com:443, use SSL for incoming and outgoing connections, use specified SSL certificates for listening socket, provide specified client certificates to remote endpoint.
+
+    $ ruby bin/viproxy -l 8443 -r dest.example.com:443 --l-ssl --r-ssl --r-sni dest.example.com --l-sslkey ssl-key.pem --l-sslcert ssl-cert.pem
+
+This will listen on localhost:8443, send incoming data towards dest.example.com:443, use SSL for incoming and outgoing connections, use specified SSL certificates for listening socket, send specified hostname to the remote endpoint using SNI extension.
 
 ## Sample Search & Replace file
 
