@@ -46,7 +46,7 @@ module EventMachine
           @req_buff = data
         end
 
-        log("Client", @req_buff)
+        log("req", @req_buff)
         relay_to_servers(@req_buff)
         @req_buff = ''
       end
@@ -133,7 +133,7 @@ module EventMachine
           @resp_buff = data
         end
 
-        log("Backend Server", @resp_buff)
+        log("resp", @resp_buff)
         send_data(@resp_buff)
         @resp_buff = ''
       end
@@ -180,9 +180,30 @@ module EventMachine
       def log(t,data)
         if $logfile
           logfile=File.new($logfile,'a')
-          #logfile.puts "-------------#{t}--------------\n\n#{data}\n\n"
           logfile.puts "#{data}"
           logfile.close
+
+          if t == 'req'
+            filename = $logfile
+            if filename.include? '.'
+              *a, b = filename.split('.', -1)
+              filename = a.join() + '_req.' + b
+            end
+            logfile_req=File.new(filename,'a')
+            logfile_req.puts "#{data}"
+            logfile_req.close
+          end
+
+          if t == 'resp'
+            filename = $logfile
+            if filename.include? '.'
+              *a, b = filename.split('.', -1)
+              filename = a.join() + '_resp.' + b
+            end
+            logfile_resp=File.new(filename, 'a')
+            logfile_resp.puts "#{data}"
+            logfile_resp.close
+          end
         end
       end
     end
