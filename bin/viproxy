@@ -51,6 +51,10 @@ OptionParser.new do |opts|
     opts.on("--#{leg}-sni [sni hostname]", String, "#{leg}-leg: SNI hostname") do |v|
       ssl_options[:sni_hostname] = v
     end
+
+    opts.on("--#{leg}-sslproto [protocol]", String, "#{leg}-leg: force SSL protocol version, i.e. TLSv1_2") do |v|
+      ssl_options[:ssl_version] = v
+    end
   end
 
   opts.on("-f", "--logfile [filename]", String,  "Log file") do |v|
