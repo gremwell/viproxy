@@ -55,6 +55,10 @@ OptionParser.new do |opts|
     opts.on("--#{leg}-sslproto [protocol]", String, "#{leg}-leg: force SSL protocol version, i.e. TLSv1_2") do |v|
       ssl_options[:ssl_version] = v
     end
+
+    opts.on("--#{leg}-ciphers [ciphers]", String, "#{leg}-leg: set SSL ciphers to use, i.e. ECDHE-RSA-AES256-GCM-SHA384") do |v|
+      ssl_options[:cipher_list] = v
+    end
   end
 
   opts.on("-f", "--logfile [filename]", String,  "Log file") do |v|
